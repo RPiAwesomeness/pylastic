@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Any, Optional, Dict, List
+from typing import Any, Dict, List
 
 
 class Clause(ABC):
@@ -16,25 +16,13 @@ class Clause(ABC):
     @property
     @abstractmethod
     def __name__(self) -> str:
-        return "Clause"
+        ...
 
     # TODO: Implement overloaded operator support? (eg. Clause() & Clause()/Clause() | Clause()/Clause() and Clause())
 
 
-class Leaf(Clause):
-    def __init__(self, field: str, value: Optional[Any] = None, **kwargs: Any):
-        super().__init__(**kwargs)
-
-        self.field = field
-        self.field_val = value
-        self.params = kwargs
-
-    def dump(self) -> Dict[str, Any]:
-        ret = {self.field: self.field_val}
-        ret.update(**self.params)
-        return ret
-
-
 class Compound(Clause):
+    children: List[Clause]
+
     def __init__(self, **kwargs) -> None:
         super().__init__(**kwargs)

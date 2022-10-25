@@ -4,25 +4,7 @@ import pytest
 from .. import Term
 from ..clause import Clause
 
-from .bool import Bool, Must, Filter, Occurrence, Should, MustNot
-
-
-@pytest.mark.parametrize(
-    "cls,expected_err",
-    [
-        (
-            Bool,
-            "bool must have at least one query clause of must, filter, should, or must_not",
-        ),
-        (Must, "must query must have at least 1 clause"),
-        (Filter, "filter query must have at least 1 clause"),
-        (Should, "should query must have at least 1 clause"),
-        (MustNot, "must_not query must have at least 1 clause"),
-    ],
-)
-def test_no_clause_params_raises(cls: Bool, expected_err: str):
-    with pytest.raises(ValueError, match=expected_err) as ex_info:
-        instance = cls()
+from .bool import Must, Filter, Occurrence, Should, MustNot
 
 
 @pytest.mark.parametrize(
