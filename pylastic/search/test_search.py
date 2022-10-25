@@ -26,12 +26,9 @@ def test_Search_method_clause():
     assert s.dump_query() == {"term": {"field": "value"}}
 
 
-def test_Search_constructor_must_with_clause():
+def test_Search_constructor_match():
     s = Search("index", Match("matchField", "matchValue"))
-    print(s.dump_query())
-    assert s.dump_query() == {
-        "bool": {"must": {"match": {"matchField": {"query": "matchValue"}}}}
-    }
+    assert s.dump_query() == {"match": {"matchField": {"query": "matchValue"}}}
 
 
 def test_Search_method_must_with_clause():

@@ -1,6 +1,3 @@
-import functools
-from re import L
-
 from typing import Any, Dict, Optional, Union
 
 from ..queries import Term
@@ -8,7 +5,7 @@ from ..queries.clause import Clause, Compound
 from ..queries.leaf import Leaf, Range, Match
 from ..queries.leaf.range import Number
 from ..queries.leaf.match import MatchQueryType
-from ..queries.compound.bool import Bool, Filter, Must, MustNot, Occurrence, Should
+from ..queries.compound.bool import Bool, Must, Should, Filter, MustNot, Occurrence
 
 
 class SearchQueryException(Exception):
@@ -17,19 +14,23 @@ class SearchQueryException(Exception):
 
 
 class Search:
-    def __init__(self, index: str, *queries: Clause) -> None:
+    def __init__(self, index: str, query: Optional[Clause] = None) -> None:
         if not index:
             raise ValueError("index must have valid string value")
         self.index = index
         self.query = None
-        for q in queries:
-            if isinstance(q, Clause):
-                self.add_new_clause(q)
+        if query is not None:
+            self.add_new_clause(query)
 
     def add_new_clause(self, clause: Clause):
         if self.query is None:
-            # If no query exists no point in doing other tests, just set the root
-            self.query = clause
+            if isinstance(clause, (Must, Filter, Should, MustNot)):
+                print("subclass", type(clause))
+                self.query = Bool(must=[clause])
+            if isinstance(clause, (Leaf, Bool)):
+                # If no query exists no point in doing other tests, just set the root
+                self.query = clause
+
             return
 
         if isinstance(self.query, Leaf):
@@ -43,9 +44,10 @@ class Search:
                 f"root of query with multiple clauses must be of the compound type, currently it is {type(self.query)}"
             )
 
+        print(clause)
         self.query.children.append(clause)
 
-    def dump_query(self) -> Optional[Dict[str, Any]]:
+    def dump_query(self) -> Union[Dict[str, Any], None]:
         return None if self.query is None else self.query.dump()
 
     def run(self):
