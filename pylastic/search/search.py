@@ -24,12 +24,19 @@ class Search:
 
     def add_new_clause(self, clause: Clause):
         if self.query is None:
-            if isinstance(clause, (Must, Filter, Should, MustNot)):
-                print("subclass", type(clause))
+            if isinstance(clause, Must):
                 self.query = Bool(must=[clause])
-            if isinstance(clause, (Leaf, Bool)):
+            elif isinstance(clause, Should):
+                self.query = Bool(should=[Clause])
+            elif isinstance(clause, Filter):
+                self.query = Bool(filter=[Clause])
+            elif isinstance(clause, MustNot):
+                self.query = Bool(must_not=[Clause])
+            elif isinstance(clause, (Leaf, Bool)):
                 # If no query exists no point in doing other tests, just set the root
                 self.query = clause
+            else:
+                raise TypeError(f"Invalid clause type {type(clause)}")
 
             return
 
@@ -44,7 +51,6 @@ class Search:
                 f"root of query with multiple clauses must be of the compound type, currently it is {type(self.query)}"
             )
 
-        print(clause)
         self.query.children.append(clause)
 
     def dump_query(self) -> Union[Dict[str, Any], None]:

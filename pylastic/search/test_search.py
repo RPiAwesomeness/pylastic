@@ -39,14 +39,28 @@ def test_Search_method_must_with_clause():
 
 
 def test_Search_method_clauses():
-    s = Search("index").must(
+    s = Search("index").should(
         Match("matchField", "matchValue"), Match("matchField2", "matchValue2")
     )
     assert s.dump_query() == {
         "bool": {
-            "must": [
+            "should": [
                 {"match": {"matchField": {"query": "matchValue"}}},
                 {"match": {"matchField2": {"query": "matchValue2"}}},
             ]
+        }
+    }
+
+
+def test_Search_method_clauses_different():
+    s = Search("index").must(
+        Match("matchField", "matchValue"), Term("termField", "termValue")
+    )
+    assert s.dump_query() == {
+        "bool": {
+            "must": {
+                "match": {"matchField": {"query": "matchValue"}},
+                "term": {"termField": "termValue"},
+            }
         }
     }

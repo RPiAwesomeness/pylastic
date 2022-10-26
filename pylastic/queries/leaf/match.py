@@ -14,5 +14,5 @@ class Match(Leaf):
 
         super().__init__(field, query=query)
 
-    def dump(self) -> Dict[str, Any]:
-        return {"match": super().dump()}
+    def name(self) -> str:
+        return "match"

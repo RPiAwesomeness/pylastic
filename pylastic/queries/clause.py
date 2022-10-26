@@ -9,13 +9,17 @@ class Clause(ABC):
         for key, arg in kwargs.items():
             setattr(self, key, arg)
 
-    @abstractmethod
-    def dump(self) -> Dict[str, Any]:
-        ...
+    def __iter__(self):
+        yield self.name(), {
+            key: value for key, value in vars(self).items() if not key.startswith("_")
+        }
 
-    @property
+    def dump(self) -> Dict[str, Any]:
+        """Dumps a dict with the clause's name and attributes"""
+        return dict(self)
+
     @abstractmethod
-    def __name__(self) -> str:
+    def name(self) -> str:
         ...
 
     # TODO: Implement overloaded operator support? (eg. Clause() & Clause()/Clause() | Clause()/Clause() and Clause())

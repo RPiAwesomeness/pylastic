@@ -1,7 +1,7 @@
 from typing import Dict, List, Any
 import pytest
 
-from .. import Term
+from .. import Term, Match
 from ..clause import Clause
 
 from .bool import Must, Filter, Occurrence, Should, MustNot
@@ -23,7 +23,7 @@ from .bool import Must, Filter, Occurrence, Should, MustNot
         (
             Should,
             [Term("fieldName", "value")],
-            {"should": {"term": {"fieldName": "value"}}},
+            {"should": [{"term": {"fieldName": "value"}}]},
         ),
         (
             MustNot,
@@ -31,10 +31,10 @@ from .bool import Must, Filter, Occurrence, Should, MustNot
             {"must_not": {"term": {"fieldName": "value"}}},
         ),
         (
-            Must,
+            Should,
             [Term("fieldName", "value"), Term("fieldName2", "value2")],
             {
-                "must": [
+                "should": [
                     {"term": {"fieldName": "value"}},
                     {"term": {"fieldName2": "value2"}},
                 ]
@@ -49,5 +49,28 @@ def test_dump_bool_clauses(
 ):
     instance = cls(*clauses)
     dumped = instance.dump()
-    assert "bool" in dumped
-    assert dumped["bool"] == expected
+    assert dumped == expected
+
+
+def test_bool_AND():
+    clause = Term("left_field", "left_value") & Match("right_field", "right_value")
+    assert clause.dump() == {
+        "bool": {
+            "must": {
+                "term": {"left_field": "left_value"},
+                "match": {"right_field": {"query": "right_value"}},
+            }
+        }
+    }
+
+
+def test_bool_OR():
+    clause = Term("left_field", "left_value") | Term("right_field", "right_value")
+    assert clause.dump() == {
+        "bool": {
+            "should": [
+                {"term": {"left_field": "left_value"}},
+                {"term": {"right_field": "right_value"}},
+            ]
+        }
+    }

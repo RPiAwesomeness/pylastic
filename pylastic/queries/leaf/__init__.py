@@ -1,4 +1,4 @@
-from typing import Any, Dict, Optional
+from typing import Any, Optional
 
 
 from ..compound.bool import Bool
@@ -12,17 +12,23 @@ class Leaf(Clause):
 
         super().__init__(**kwargs)
 
-        self.field = field
+        self.field_name = field
         self._field_val = value
         self._params = kwargs
 
-    def dump(self) -> Dict[str, Any]:
-        if self._field_val:
-            return {self.field: self._field_val}
-        return {self.field: self._params}
+    def dump(self):
+        return dict(self)
 
     def __and__(self, rhs: Clause) -> Bool:
         return Bool(must=[self, rhs])
+
+    def __or__(self, rhs: Clause) -> Bool:
+        return Bool(should=[self, rhs])
+
+    def __iter__(self):
+        yield self.name(), {
+            self.field_name: self._field_val if self._field_val else self._params
+        }
 
 
 from .match import Match

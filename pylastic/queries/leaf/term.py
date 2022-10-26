@@ -1,4 +1,3 @@
-from typing import Any, Dict
 from ..leaf import Leaf
 
 
@@ -8,5 +7,5 @@ class Term(Leaf):
             raise ValueError("value parameter must not be None")
         super().__init__(field, value)
 
-    def dump(self) -> Dict[str, Any]:
-        return {"term": super().dump()}
+    def name(self) -> str:
+        return "term"

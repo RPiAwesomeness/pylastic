@@ -1,4 +1,4 @@
-from typing import Any, Dict, Optional, Union
+from typing import Dict, Optional, Union
 
 from . import Leaf
 
@@ -27,20 +27,8 @@ class Range(Leaf):
             return any([self.gt, self.lt, self.gte, self.lte, self.eq, self.format])
 
         def dump(self) -> Dict[str, Optional[Union[str, Number]]]:
-            ret = dict()
-            if self.gt is not None:
-                ret["gt"] = self.gt
-            if self.lt is not None:
-                ret["lt"] = self.lt
-            if self.gte is not None:
-                ret["gte"] = self.gte
-            if self.lte is not None:
-                ret["lte"] = self.lte
-            if self.eq is not None:
-                ret["eq"] = self.eq
-            if self.format is not None:
-                ret["format"] = self.format
-
+            ret = {key: value for key, value in vars(self).items() if value is not None}
+            print(ret)
             return ret
 
     def __init__(
@@ -53,14 +41,13 @@ class Range(Leaf):
         eq: Optional[Number] = None,
         format: Optional[str] = None,
     ) -> None:
-        fields = {"gt": gt, "lt": lt, "gte": gte, "lte": lte, "eq": eq}
-        self.params = Range.Params(format=format, **fields)
-        if not any(fields.values()):
+        self.params = Range.Params(gt=gt, lt=lt, gte=gte, lte=lte, eq=eq, format=format)
+        if not self.params.any():
             raise ValueError(
                 "Range query must have at least one of gt, lt, gte, lte, eq"
             )
 
-        super().__init__(field)
+        super().__init__(field, **self.params.dump())
 
-    def dump(self) -> Dict[str, Any]:
-        return {"range": {self.field: self.params.dump()}}
+    def name(self) -> str:
+        return "range"
